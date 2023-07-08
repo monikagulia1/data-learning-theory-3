@@ -1,0 +1,150 @@
+1. Is it OK to initialize all the weights to the same value as long as that value is selected
+randomly using He initialization?
+2. Is it OK to initialize the bias terms to 0?
+3. Name three advantages of the SELU activation function over ReLU.
+4. In which cases would you want to use each of the following activation functions: SELU, leaky
+ReLU (and its variants), ReLU, tanh, logistic, and softmax?
+5. What may happen if you set the momentum hyperparameter too close to 1 (e.g., 0.99999)
+when using an SGD optimizer?
+6. Name three ways you can produce a sparse model.
+7. Does dropout slow down training? Does it slow down inference (i.e., making predictions on
+new instances)? What about MC Dropout?
+8. Practice training a deep neural network on the CIFAR10 image dataset:
+a. Build a DNN with 20 hidden layers of 100 neurons each (that’s too many, but it’s the
+point of this exercise). Use He initialization and the ELU activation function.
+b. Using Nadam optimization and early stopping, train the network on the CIFAR10
+dataset. You can load it with keras.datasets.cifar10.load_​data(). The dataset is
+composed of 60,000 32 × 32–pixel color images (50,000 for training, 10,000 for
+testing) with 10 classes, so you’ll need a softmax output layer with 10 neurons.
+Remember to search for the right learning rate each time you change the model’s
+architecture or hyperparameters.
+c. Now try adding Batch Normalization and compare the learning curves: Is it
+converging faster than before? Does it produce a better model? How does it affect
+training speed?
+d. Try replacing Batch Normalization with SELU, and make the necessary adjustements
+to ensure the network self-normalizes (i.e., standardize the input features, use
+LeCun normal initialization, make sure the DNN contains only a sequence of dense
+layers, etc.).
+e. Try regularizing the model with alpha dropout. Then, without retraining your model,
+see if you can achieve better accuracy using MC Dropout.
+
+  answer-
+
+  1. Initializing all the weights to the same value, even if randomly selected using He initialization, is not recommended. He initialization is a method that initializes the weights of a neural network based on the size of the previous layer. It helps in preventing the vanishing/exploding gradient problem. However, initializing all weights to the same value would make the neurons in the same layer symmetric, and they would all learn the same features. This reduces the model's capacity to learn and slows down the training process. It is better to initialize the weights with small random values following the appropriate initialization method.
+
+2. Yes, it is generally acceptable to initialize the bias terms to 0. Bias terms provide a constant offset to the weighted sum of inputs in each neuron. Initializing biases to 0 is a common practice and helps in maintaining symmetry in the network. However, in some cases, especially when dealing with unbalanced datasets or when prior knowledge suggests a bias towards a particular class, non-zero bias values can be used to introduce a bias towards certain outputs.
+
+3. Three advantages of the SELU (Scaled Exponential Linear Unit) activation function over ReLU (Rectified Linear Unit) are:
+   a. Self-normalizing property: SELU activation function has a self-normalizing property, meaning it helps in stabilizing the activations and gradients during training, leading to faster convergence and better gradient flow.
+   b. Vanishing/exploding gradient prevention: SELU activation function helps in preventing the vanishing/exploding gradient problem, allowing for deeper neural networks to be trained effectively.
+   c. Automatic regularization: SELU includes a form of regularization within the activation function itself. It encourages sparse activation patterns, which can improve generalization and reduce overfitting.
+
+4. The choice of activation function depends on the specific problem and the characteristics of the data. Here are some guidelines:
+
+- SELU: SELU is suitable for deep neural networks, especially when the network has many layers. It helps in stabilizing the activations and gradients, preventing vanishing/exploding gradients and providing automatic regularization.
+
+- Leaky ReLU and its variants: Leaky ReLU addresses the "dying ReLU" problem by allowing small negative values for negative inputs. It can be effective in preventing dead neurons and improving gradient flow. Variants like Parametric ReLU (PReLU) and Exponential Linear Unit (ELU) can also be useful in different scenarios.
+
+- ReLU: ReLU is a popular choice as it is computationally efficient and has shown good performance in many applications. It is effective in capturing nonlinearities and is often used as the default choice for hidden layers in deep neural networks.
+
+- Tanh: Tanh is a suitable choice for hidden layers when the data is normalized or standardized. It produces outputs between -1 and 1, providing symmetry around 0.
+
+- Logistic (Sigmoid): Logistic function is commonly used in binary classification problems, where the output needs to be in the range of 0 to 1, representing probabilities.
+
+- Softmax: Softmax function is used in the output layer for multi-class classification problems, where the outputs need to represent probabilities that sum up to 1.
+
+5. Setting the momentum hyperparameter too close to 1 (e.g., 0.99999) when using an SGD optimizer can cause the training process to slow down significantly. Momentum helps accelerate the convergence by accumulating a fraction of the previous weight updates. When the momentum is too high, the weight updates from previous iterations have a strong influence, making it harder for the optimizer to escape from local minima or adapt to changes in the landscape of the loss function. This can lead to slow convergence and longer training times.
+
+6. Three ways to produce a sparse model are:
+
+- L1 Regularization: By adding an L1 regularization term to the loss function during training, the model is encouraged to have many weights close to zero. This results in a sparse model where only a subset of features or connections is relevant.
+
+- Dropout: Dropout is a regularization technique that randomly sets a fraction of the activations to zero during training. This encourages the network to be more robust and prevents over-reliance on specific connections, promoting sparsity.
+
+- Thresholding: After training, the weights of the model can be directly thresholded, setting small weights to zero. This can be done based on a pre-defined threshold or by using techniques like magnitude pruning, where weights below a certain threshold are removed.
+
+7. Dropout does not slow down training, but it can affect the effective learning rate. Dropout randomly sets a fraction of the activations to zero during training, which introduces noise and prevents overfitting. While dropout can slow down inference (making predictions on new instances) due to the need to average the predictions of multiple dropout-enabled networks, it does not slow down training itself.
+
+MC Dropout (Monte Carlo Dropout) is a technique that extends dropout to produce uncertainty estimates. It performs multiple forward passes with dropout enabled at test time and averages the predictions. MC Dropout can lead to slower inference times compared to standard dropout since it requires multiple forward passes. However, it provides valuable uncertainty information, which can be useful in tasks like Bayesian inference or model ensembling.
+
+8. Here's an example
+
+that demonstrates the steps for training a deep neural network on the CIFAR10 image dataset using TensorFlow and Keras:
+
+a. Build a DNN with 20 hidden layers of 100 neurons each, using He initialization and the ELU activation function:
+
+```python
+import tensorflow as tf
+from tensorflow import keras
+
+model = keras.models.Sequential()
+model.add(keras.layers.Flatten(input_shape=[32, 32, 3]))
+
+for _ in range(20):
+    model.add(keras.layers.Dense(100, activation="elu", kernel_initializer="he_normal"))
+
+model.add(keras.layers.Dense(10, activation="softmax"))
+```
+
+b. Train the network on the CIFAR10 dataset using Nadam optimization and early stopping:
+
+```python
+(X_train_full, y_train_full), (X_test, y_test) = keras.datasets.cifar10.load_data()
+
+X_train = X_train_full.astype('float32') / 255.0
+X_test = X_test.astype('float32') / 255.0
+
+y_train = keras.utils.to_categorical(y_train_full, num_classes=10)
+y_test = keras.utils.to_categorical(y_test, num_classes=10)
+
+model.compile(optimizer=keras.optimizers.Nadam(learning_rate=0.001),
+              loss='categorical_crossentropy',
+              metrics=['accuracy'])
+
+early_stopping_cb = keras.callbacks.EarlyStopping(patience=10, restore_best_weights=True)
+
+history = model.fit(X_train, y_train, epochs=100, validation_data=(X_test, y_test),
+                    callbacks=[early_stopping_cb])
+```
+
+c. Adding Batch Normalization to the network:
+
+```python
+model = keras.models.Sequential()
+model.add(keras.layers.Flatten(input_shape=[32, 32, 3]))
+
+for _ in range(20):
+    model.add(keras.layers.Dense(100, kernel_initializer="he_normal"))
+    model.add(keras.layers.BatchNormalization())
+    model.add(keras.layers.Activation("elu"))
+
+model.add(keras.layers.Dense(10, activation="softmax"))
+```
+
+d. Replacing Batch Normalization with SELU:
+
+```python
+model = keras.models.Sequential()
+model.add(keras.layers.Flatten(input_shape=[32, 32, 3]))
+
+for _ in range(20):
+    model.add(keras.layers.Dense(100, activation="selu", kernel_initializer="lecun_normal"))
+
+model.add(keras.layers.Dense(10, activation="softmax"))
+```
+
+e. Adding alpha dropout and performing MC Dropout:
+
+```python
+# Alpha Dropout
+model.add(keras.layers.AlphaDropout(rate=0.5))
+
+# MC Dropout
+class MCDropout(keras.layers.Dropout):
+    def call(self, inputs):
+        return super().call(inputs, training=True)
+
+model.add(MCDropout(rate=0.5))
+```
+
+Remember to adjust the hyperparameters and experiment with different configurations to find the optimal performance.
